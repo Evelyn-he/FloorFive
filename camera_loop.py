@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from detection_model import is_distracted
 from popup.chatbot_launcher import launch_chatbot, kill_chatbot
+from audio_pipeline.record_system_audio import SystemAudioRecorder
 
 # State variables
 IS_RECORDING = False
@@ -16,6 +17,9 @@ fps = cap.get(cv2.CAP_PROP_FPS) or 30
 buffer_idx = 0
 buffer_size = int(3 * fps)
 distracted_buffer = np.zeros(buffer_size, dtype=np.int8)
+
+# launch audio recording
+recorder = SystemAudioRecorder()
 
 # launch chatbot
 chatbot = launch_chatbot()
@@ -38,10 +42,12 @@ while cap.isOpened():
     # Check when to start/stop recording
     if not IS_RECORDING and distraction_avg >= 0.8:
         IS_RECORDING = True
+        recorder.start_recording()
         print('START RECORDING')
 
     if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.1:
         IS_RECORDING = False
+        recorder.stop_recording()
         print('STOP RECORDING')
 
     # convert frame back to BGR to displaying
@@ -66,6 +72,11 @@ while cap.isOpened():
         IS_RECORDING ^= True
         MANUAL_OVERRIDE ^= True
 
+        if IS_RECORDING:
+            recorder.start_recording()
+        else:
+            recorder.stop_recording()
+
     # check for escape key
     if keyboard.is_pressed('esc'):
         break
@@ -75,6 +86,10 @@ while cap.isOpened():
 
 # kill chatbot
 kill_chatbot(chatbot)
+
+# Clean up .wav files
+recorder.stop_recording()
+recorder.audio_cleanup()
 
 cap.release()
 cv2.destroyAllWindows()
