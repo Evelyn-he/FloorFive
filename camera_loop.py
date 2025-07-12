@@ -67,4 +67,3 @@ kill_chatbot(chatbot)
 
 cap.release()
 cv2.destroyAllWindows()
-cleanup()
