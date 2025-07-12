@@ -5,9 +5,9 @@ from datetime import datetime
 
 # --- Global constants / colors ---
 
-FILE_PATH = "text.txt"
-LOG_FILE = "record_log.txt"
-USER_MSG_LOG = "user_messages.txt"
+BASE_DIR = os.path.dirname(__file__)
+FILE_PATH = os.path.join(BASE_DIR, "text.txt")
+USER_MSG_LOG = os.path.join(BASE_DIR, "user_messages.txt")  # Fixed: was tuple, now string
 REFRESH_INTERVAL_MS = 500
 
 BG_COLOR = "#1F2833"          # Dark blue-gray background
@@ -90,11 +90,6 @@ def refresh_paragraphs(frame, canvas, state, seen):
         canvas.after_idle(lambda: canvas.yview_moveto(1.0))
     canvas.after(REFRESH_INTERVAL_MS, refresh_paragraphs, frame, canvas, state, seen)
 
-def log_recording_event(event_type):
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(f"{event_type} recording at {now}\n")
-
 def log_user_message(message):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(USER_MSG_LOG, "a", encoding="utf-8") as f:
@@ -115,6 +110,7 @@ def add_placeholder(textbox, placeholder="Ask me anything..."):
     textbox.configure(text_color=PLACEHOLDER_COLOR)
     textbox.bind("<FocusIn>", on_focus_in)
     textbox.bind("<FocusOut>", on_focus_out)
+    return on_focus_out  # Return the function so we can call it manually
 
 def on_mousewheel(event, canvas):
     canvas.yview_scroll(-1 * int(event.delta / 120), "units")
@@ -122,12 +118,15 @@ def on_mousewheel(event, canvas):
 def on_canvas_resize(event, canvas, window_id):
     canvas.itemconfig(window_id, width=event.width)
 
-def send_message(input_text, frame, canvas, root):
+def send_message(input_text, frame, canvas, root, restore_placeholder):
     msg = input_text.get("1.0", "end-1c").strip()
     if msg and msg != "Ask me anything...":
         display_paragraph(msg, frame, align_right=True)
         log_user_message(msg)
         input_text.delete("1.0", "end")
+        # Force focus away from textbox, then restore placeholder
+        root.focus_set()  # Move focus to root window
+        restore_placeholder(None)
         root.update_idletasks()
         canvas.configure(scrollregion=canvas.bbox("all"))
         canvas.yview_moveto(1.0)
@@ -174,13 +173,13 @@ def main():
     )
     input_text.place(relx=0.02, rely=0.2, relwidth=0.82, relheight=0.6)
 
-    add_placeholder(input_text)
+    restore_placeholder = add_placeholder(input_text)
 
     send_button = ctk.CTkButton(
         bottom,
         text="➤",
         font=ctk.CTkFont(FONT, 16),
-        command=lambda: send_message(input_text, frame, canvas, root),
+        command=lambda: send_message(input_text, frame, canvas, root, restore_placeholder),
         width=45,
         height=45,
         corner_radius=9999,
@@ -189,7 +188,7 @@ def main():
     )
     send_button.place(relx=0.92, rely=0.5, anchor='center')
 
-    input_text.bind("<Return>", lambda e: (send_message(input_text, frame, canvas, root), "break")[1] if not (e.state & 0x0001) else None)
+    input_text.bind("<Return>", lambda e: (send_message(input_text, frame, canvas, root, restore_placeholder), "break")[1] if not (e.state & 0x0001) else None)
 
     last_state = [None]
     seen = []

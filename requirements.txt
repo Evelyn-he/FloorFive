@@ -11,6 +11,7 @@ sounddevice
 soundfile
 packaging==25.0
 protobuf==6.31.1
+psutil==7.0.0
 pyreadline3==3.5.4
 sympy==1.14.0
 

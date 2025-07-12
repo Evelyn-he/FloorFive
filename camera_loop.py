@@ -1,6 +1,9 @@
 import cv2
+import subprocess
+import os
 import numpy as np
 from detection_model import is_distracted
+from popup.chatbot_launcher import launch_chatbot, kill_chatbot
 
 IS_RECORDING = False
 
@@ -13,6 +16,8 @@ buffer_idx = 0
 buffer_size = int(3 * fps)
 distracted_buffer = np.zeros(buffer_size, dtype=np.int8)
 
+# launch chatbot
+chatbot = launch_chatbot()
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -57,5 +62,9 @@ while cap.isOpened():
     if cv2.waitKey(1) == 27:
         break
 
+# kill chatbot
+kill_chatbot(chatbot)
+
 cap.release()
 cv2.destroyAllWindows()
+cleanup()

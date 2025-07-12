@@ -1,13 +1,1 @@
-help me
-
-
-no
-
-
-yes
-
-
-
-maybe
-
-
+The sky appears blue because sunlight, which is made up of all visible colors, gets scattered as it passes through Earth's atmosphere. This scattering, known as Rayleigh scattering, affects shorter wavelengths like blue and violet much more than longer wavelengths like red. Although violet light is actually scattered the most, our eyes are less sensitive to violet, and some of it is absorbed by the atmosphere. As a result, the scattered blue light dominates our vision, making the sky look blue.
