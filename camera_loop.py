@@ -1,11 +1,12 @@
+import keyboard
 import cv2
-import subprocess
-import os
 import numpy as np
 from detection_model import is_distracted
 from popup.chatbot_launcher import launch_chatbot, kill_chatbot
 
+# State variables
 IS_RECORDING = False
+MANUAL_OVERRIDE = False
 
 # start video
 cap = cv2.VideoCapture(0)
@@ -35,11 +36,11 @@ while cap.isOpened():
     buffer_idx = (buffer_idx + 1) % buffer_size
 
     # Check when to start/stop recording
-    if distraction_avg >= 0.8 and not IS_RECORDING:
+    if not IS_RECORDING and distraction_avg >= 0.8:
         IS_RECORDING = True
         print('START RECORDING')
 
-    if distraction_avg <= 0.1 and IS_RECORDING:
+    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.1:
         IS_RECORDING = False
         print('STOP RECORDING')
 
@@ -58,8 +59,15 @@ while cap.isOpened():
 
     cv2.imshow(window, frame)
 
+    # allow manual start/stop recording override
+    if keyboard.is_pressed('r'):
+        while keyboard.is_pressed('r'):
+            pass
+        IS_RECORDING ^= True
+        MANUAL_OVERRIDE ^= True
+
     # check for escape key
-    if cv2.waitKey(1) == 27:
+    if keyboard.is_pressed('esc'):
         break
 
 # kill chatbot
