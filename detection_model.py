@@ -8,7 +8,7 @@ def is_distracted(frame):
     score, landmarks = get_model_ouptut(frame)
     # TODO: implement more complicated distraction detection based on face landmarks
     # print(score)
-    return int(score > 0.8)
+    return int(score < 0.8)
 
 
 def get_model_ouptut(image):
