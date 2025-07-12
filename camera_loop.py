@@ -12,6 +12,11 @@ MANUAL_OVERRIDE = False
 cap = cv2.VideoCapture(0)
 fps = cap.get(cv2.CAP_PROP_FPS) or 30
 
+# create video window
+window = 'Distraction Detection'
+cv2.namedWindow(window)
+cv2.moveWindow(window, 100, 50)
+
 # create buffer for how long a user should stay distracted for
 buffer_idx = 0
 buffer_size = int(3 * fps)
@@ -46,11 +51,6 @@ while cap.isOpened():
 
     # convert frame back to BGR to displaying
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-    # display window
-    window = 'Distraction Detection'
-    cv2.namedWindow(window)
-    cv2.moveWindow(window, 100, 50)
 
     # Show recording message
     if IS_RECORDING:
