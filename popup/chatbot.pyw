@@ -194,6 +194,18 @@ def main():
     seen = []
     refresh_paragraphs(frame, canvas, last_state, seen)
 
+
+    # Position window in bottom-right corner
+    root.update_idletasks()
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    window_width = root.winfo_width()
+    window_height = root.winfo_height()
+
+    x = screen_width - window_width
+    y = screen_height - window_height
+
+    root.geometry(f"+{x}+{y}")
     root.mainloop()
 
 if __name__ == "__main__":
