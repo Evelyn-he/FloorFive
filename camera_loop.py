@@ -45,6 +45,12 @@ while cap.isOpened():
     window = 'Distraction Detection'
     cv2.namedWindow(window)
     cv2.moveWindow(window, 100, 50)
+
+    # Show recording message
+    if IS_RECORDING:
+        cv2.putText(frame, "RECORDING", (20, 50),
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
     cv2.imshow(window, frame)
 
     # check for escape key
