@@ -1,16 +1,16 @@
 import cv2
+import keyboard
 import numpy as np
 from utils.onnx_utils import create_ort_session
 
 MP_landmark = create_ort_session("models/mediapipe_face-facelandmarkdetector-w8a8.onnx")
 
+
 def is_distracted(frame):
-    # dummy return for now. Can trigger by pressing spacebar
-    return int(cv2.waitKey(1) == ord(' '))
-
-    # TODO: use model output to calculate if "distracted"
-    output = get_model_ouptut(frame)
-
+    # Actual key check
+    space_pressed = int(keyboard.is_pressed('space'))
+    #print(space_pressed) # uncomment to test keyboard input detection
+    return space_pressed
 
 def get_model_ouptut(image):
     # resize image to model input shape
