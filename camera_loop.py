@@ -70,6 +70,9 @@ while cap.isOpened():
     if keyboard.is_pressed('esc'):
         break
 
+    # require waitKey to update frames
+    cv2.waitKey(1)
+
 # kill chatbot
 kill_chatbot(chatbot)
 
