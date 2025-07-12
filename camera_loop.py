@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from detection_model import is_distracted
 
 IS_RECORDING = False
 
@@ -9,13 +10,8 @@ fps = cap.get(cv2.CAP_PROP_FPS) or 30
 
 # create buffer for how long a user should stay distracted for
 buffer_idx = 0
-buffer_size = int(4 * fps)
+buffer_size = int(3 * fps)
 distracted_buffer = np.zeros(buffer_size, dtype=np.int8)
-
-# placeholder function for distraction detection
-def is_distracted():
-    """Test distraction by pressing space bar"""
-    return int(cv2.waitKey(1) == ord(' '))
 
 
 while cap.isOpened():
@@ -27,7 +23,7 @@ while cap.isOpened():
     frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
 
     # TODO: replace with call to detection models
-    distracted = is_distracted()
+    distracted = is_distracted(frame)
 
     distracted_buffer[buffer_idx] = distracted
     distraction_avg = np.average(distracted_buffer)
