@@ -1,12 +1,29 @@
-import tkinter as tk
+import customtkinter as ctk
 import os
 import time
 from datetime import datetime
+
+# --- Global constants / colors ---
 
 FILE_PATH = "text.txt"
 LOG_FILE = "record_log.txt"
 USER_MSG_LOG = "user_messages.txt"
 REFRESH_INTERVAL_MS = 500
+
+BG_COLOR = "#1F2833"          # Dark blue-gray background
+CHAT_BOT_BUBBLE = "#2C3E50"   # Slightly lighter dark for bot messages
+CHAT_USER_BUBBLE = "#3B82F6"  # MS Teams blue for user messages
+TEXT_COLOR = "#D1D5DB"        # Light gray text color
+PLACEHOLDER_COLOR = "#6B7280" # Medium gray placeholder text
+
+TEXT_SIZE = 13
+FONT = "Segoe UI"
+
+# --- Initialization for customtkinter ---
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
+
+# --- Helper functions ---
 
 def load_paragraphs(path):
     if not os.path.exists(path):
@@ -15,40 +32,62 @@ def load_paragraphs(path):
         content = f.read()
     return [p.strip() for p in content.split('\n\n') if p.strip()]
 
-def display_paragraph(text, parent, align_right=False):
-    outer = tk.Frame(parent, bg='lightgray')
-    outer.pack(fill='x', pady=5, padx=5)
+def type_text(label, full_text, index=0, delay=15):
+    if index <= len(full_text):
+        label.configure(text=full_text[:index])
+        label.after(delay, type_text, label, full_text, index + 1, delay)
 
-    bubble = tk.Frame(
-        outer,
-        bg="#dcf8c6" if align_right else "white",
-        highlightbackground="black",
-        highlightthickness=1
+def display_paragraph(text, parent, align_right=False, typing=False):
+    outer = ctk.CTkFrame(parent, fg_color="transparent", corner_radius=0)
+    outer.pack(fill='x', pady=5, padx=5, anchor='e' if align_right else 'w')
+
+    bubble = ctk.CTkFrame(
+        master=outer,
+        fg_color=CHAT_USER_BUBBLE if align_right else CHAT_BOT_BUBBLE,
+        corner_radius=12
     )
-
-    label = tk.Label(
-        bubble,
-        text=text,
-        wraplength=400,
-        justify='left',
-        anchor='w',
-        font=('Arial', 10),
-        bg=bubble['bg']
+    # Pack without fill='x' so bubble only takes needed space
+    bubble.pack(anchor='e' if align_right else 'w', padx=10, pady=2)
+    
+    label = ctk.CTkLabel(
+        master=bubble,
+        text="" if typing else text,
+        text_color=TEXT_COLOR,
+        font=ctk.CTkFont(FONT, TEXT_SIZE),
+        wraplength=400,  # This still limits max width
+        justify="left",
+        anchor="w"
     )
-    label.pack(padx=10, pady=8)
+    label.pack(padx=10, pady=(8, 4), anchor="w")
 
-    bubble.pack(side='right' if align_right else 'left', padx=10)
+    if typing and not align_right:
+        # Start typing animation for bot message
+        type_text(label, text)
+    elif typing and align_right:
+        # For user message, just show immediately
+        label.configure(text=text)
+
+    timestamp = datetime.now().strftime("%H:%M")
+    time_label = ctk.CTkLabel(
+        master=bubble,
+        text=timestamp,
+        font=ctk.CTkFont(FONT, 9, "bold"),
+        text_color="#A9C4FF" if align_right else "gray",
+        anchor='e'
+    )
+    time_label.pack(anchor='e', padx=10, pady=(0, 4))
+
 
 def refresh_paragraphs(frame, canvas, state, seen):
     mtime = os.path.getmtime(FILE_PATH) if os.path.exists(FILE_PATH) else None
     if mtime != state[0]:
         paragraphs = load_paragraphs(FILE_PATH)
         for para in paragraphs[len(seen):]:
-            display_paragraph(para, frame, align_right=False)
+            display_paragraph(para, frame, align_right=False, typing=True)
             seen.append(para)
         canvas.configure(scrollregion=canvas.bbox("all"))
         state[0] = mtime
-        canvas.after_idle(lambda: canvas.yview_moveto(1.0))  # Scroll to bottom
+        canvas.after_idle(lambda: canvas.yview_moveto(1.0))
     canvas.after(REFRESH_INTERVAL_MS, refresh_paragraphs, frame, canvas, state, seen)
 
 def log_recording_event(event_type):
@@ -61,20 +100,56 @@ def log_user_message(message):
     with open(USER_MSG_LOG, "a", encoding="utf-8") as f:
         f.write(f"[{now}] {message}\n")
 
+def add_placeholder(textbox, placeholder="Ask me anything..."):
+    def on_focus_in(event):
+        if textbox.get("1.0", "end-1c") == placeholder:
+            textbox.delete("1.0", "end")
+            textbox.configure(text_color=TEXT_COLOR)
+
+    def on_focus_out(event):
+        if textbox.get("1.0", "end-1c").strip() == "":
+            textbox.insert("1.0", placeholder)
+            textbox.configure(text_color=PLACEHOLDER_COLOR)
+
+    textbox.insert("1.0", placeholder)
+    textbox.configure(text_color=PLACEHOLDER_COLOR)
+    textbox.bind("<FocusIn>", on_focus_in)
+    textbox.bind("<FocusOut>", on_focus_out)
+
+def on_mousewheel(event, canvas):
+    canvas.yview_scroll(-1 * int(event.delta / 120), "units")
+
+def on_canvas_resize(event, canvas, window_id):
+    canvas.itemconfig(window_id, width=event.width)
+
+def send_message(input_text, frame, canvas, root):
+    msg = input_text.get("1.0", "end-1c").strip()
+    if msg and msg != "Ask me anything...":
+        display_paragraph(msg, frame, align_right=True)
+        log_user_message(msg)
+        input_text.delete("1.0", "end")
+        root.update_idletasks()
+        canvas.configure(scrollregion=canvas.bbox("all"))
+        canvas.yview_moveto(1.0)
+
+# --- Main GUI setup ---
+
 def main():
-    root = tk.Tk()
-    root.title("Text Viewer")
+    root = ctk.CTk()
+    root.title("Chatbot GUI")
     root.geometry("500x400")
+    root.configure(fg_color=BG_COLOR)
     root.minsize(500, 300)
+    root.maxsize(500, 300)
 
-    container = tk.Frame(root)
-    container.place(relx=0, rely=0, relwidth=1, relheight=0.72)
+    container = ctk.CTkFrame(root, fg_color=BG_COLOR, corner_radius=0)
+    container.place(relx=0, rely=0, relwidth=1, relheight=0.78)
 
-    canvas = tk.Canvas(container, bg='lightgray')
-    scrollbar = tk.Scrollbar(container, command=canvas.yview)
+    canvas = ctk.CTkCanvas(container, bg=BG_COLOR, highlightthickness=0)
+    scrollbar = ctk.CTkScrollbar(container, command=canvas.yview)
     canvas.configure(yscrollcommand=scrollbar.set)
 
-    frame = tk.Frame(canvas, bg='lightgray')
+    frame = ctk.CTkFrame(canvas, fg_color=BG_COLOR)
     frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
     window_id = canvas.create_window((0, 0), window=frame, anchor="nw")
@@ -82,59 +157,39 @@ def main():
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
 
-    def on_canvas_resize(event):
-        canvas.itemconfig(window_id, width=event.width)
+    canvas.bind_all("<MouseWheel>", lambda e: on_mousewheel(e, canvas))
+    canvas.bind("<Configure>", lambda e: on_canvas_resize(e, canvas, window_id))
 
-    canvas.bind("<Configure>", on_canvas_resize)
+    bottom = ctk.CTkFrame(root, fg_color=BG_COLOR)
+    bottom.place(relx=0, rely=0.78, relwidth=1, relheight=0.22)
 
-    bottom = tk.Frame(root, bg='gray')
-    bottom.place(relx=0, rely=0.72, relwidth=1, relheight=0.28)
+    input_text = ctk.CTkTextbox(
+        bottom,
+        font=ctk.CTkFont(FONT, TEXT_SIZE),
+        wrap='word',
+        height=50,
+        text_color=TEXT_COLOR,
+        fg_color=CHAT_BOT_BUBBLE,
+        corner_radius=8
+    )
+    input_text.place(relx=0.02, rely=0.2, relwidth=0.82, relheight=0.6)
 
-    input_text = tk.Text(bottom, font=('Arial', 10), wrap='word')
-    input_text.place(relx=0.01, rely=0.05, relwidth=0.65, relheight=0.9)
+    add_placeholder(input_text)
 
-    is_recording = [False]
-    start_time = [None]
+    send_button = ctk.CTkButton(
+        bottom,
+        text="➤",
+        font=ctk.CTkFont(FONT, 16),
+        command=lambda: send_message(input_text, frame, canvas, root),
+        width=45,
+        height=45,
+        corner_radius=9999,
+        fg_color=CHAT_USER_BUBBLE,
+        text_color="white"
+    )
+    send_button.place(relx=0.92, rely=0.5, anchor='center')
 
-    def update_record_button_text():
-        if is_recording[0]:
-            elapsed = int(time.time() - start_time[0])
-            mins = elapsed // 60
-            secs = elapsed % 60
-            record_button.config(text=f"Stop Recording ({mins:02d}:{secs:02d})")
-            root.after(500, update_record_button_text)
-        else:
-            record_button.config(text="Start Recording")
-
-    def toggle_recording():
-        if not is_recording[0]:
-            is_recording[0] = True
-            start_time[0] = time.time()
-            log_recording_event("Start")
-            update_record_button_text()
-        else:
-            is_recording[0] = False
-            log_recording_event("Stop")
-            record_button.config(text="Start Recording")
-
-    def send_message():
-        msg = input_text.get("1.0", "end-1c").strip()
-        if msg:
-            display_paragraph(msg, frame, align_right=True)
-            log_user_message(msg)
-            input_text.delete("1.0", "end")
-
-            root.update_idletasks()
-            canvas.configure(scrollregion=canvas.bbox("all"))
-            canvas.yview_moveto(1.0)
-
-    input_text.bind("<Return>", lambda e: (send_message(), "break")[1] if not (e.state & 0x0001) else None)
-
-    send_button = tk.Button(bottom, text="Send", font=('Arial', 10), command=send_message)
-    send_button.place(relx=0.68, rely=0.05, relwidth=0.3, relheight=0.45)
-
-    record_button = tk.Button(bottom, text="Start Recording", font=('Arial', 10), command=toggle_recording)
-    record_button.place(relx=0.68, rely=0.52, relwidth=0.3, relheight=0.45)
+    input_text.bind("<Return>", lambda e: (send_message(input_text, frame, canvas, root), "break")[1] if not (e.state & 0x0001) else None)
 
     last_state = [None]
     seen = []
