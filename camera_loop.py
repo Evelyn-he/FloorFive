@@ -45,12 +45,12 @@ while cap.isOpened():
     buffer_idx = (buffer_idx + 1) % buffer_size
 
     # Check when to start/stop recording
-    if not IS_RECORDING and distraction_avg >= 0.8:
+    if not IS_RECORDING and distraction_avg >= 0.85:
         IS_RECORDING = True
         recorder.start_recording()
         print('START RECORDING')
 
-    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.1:
+    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.5:
         IS_RECORDING = False
         recorder.stop_recording()
         print('STOP RECORDING')

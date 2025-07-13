@@ -4,7 +4,7 @@ import onnxruntime as ort
 def create_ort_session(model_path: str):
     # cache our model to reduce load times
     options = ort.SessionOptions()
-    options.add_session_config_entry("ep.context_enable", 1)
+    #options.add_session_config_entry("ep.context_enable", 1)
 
     session = ort.InferenceSession(
         model_path,
