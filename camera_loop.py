@@ -6,6 +6,7 @@ from detection_model import is_distracted
 from popup.chatbot_launcher import launch_chatbot, kill_chatbot
 from audio_pipeline.record_system_audio import SystemAudioRecorder, resample_to_16k
 from whisper_pipeline.transcriber import transcribe
+from gemma_pipeline.run_gemma import GemmaRunner
 
 # State variables
 IS_RECORDING = False
@@ -35,8 +36,12 @@ chatbot = launch_chatbot()
 def process_audio(filename):
     resample_to_16k(filename)
     transcript = transcribe(filename)
+    prompt = "<start_of_turn>user\nMy professor is recording a lecture. Give a SHORT summary of this snippet of his lecture: " + transcript + "<end_of_turn><start_of_turn>model\n"
+    r = GemmaRunner()
+    output = r.create_session(prompt)
+    print("OUTPUT HERE:", output)
     with open("popup/text.txt", "a", encoding="utf-8") as f:
-        f.write("\n\n" + transcript)
+        f.write("\n\n" + output)
 
 while cap.isOpened():
     ret, frame = cap.read()
