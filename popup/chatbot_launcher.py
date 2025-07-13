@@ -8,6 +8,10 @@ def launch_chatbot():
     return subprocess.Popen(["pythonw", script_path], shell=True)
 
 def kill_chatbot(chatbot_instance):
+    # Clean file containing text for chatbot:
+    with open(os.path.join(os.path.dirname(__file__), "text.txt"), "w", encoding="utf-8"):
+        pass
+
     # Straight up killing the chatbot instance doesn't get rid
     # of the GUI popup. Need to kill child 
     if chatbot_instance and chatbot_instance.poll() is None:

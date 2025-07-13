@@ -1,5 +1,6 @@
 import sounddevice as sd
 import soundfile as sf
+import librosa
 import threading
 import time
 import os
@@ -13,9 +14,9 @@ class SystemAudioRecorder:
         self.file = None
         self.thread = None
         self.device_index = None
-        self.samplerate = None
+        self.samplerate = None #16000
         self.recording_number = 0
-        
+            
     def find_loopback_device(self):
         """Find the WASAPI loopback device for system audio capture."""
         devices = sd.query_devices()
@@ -70,9 +71,12 @@ class SystemAudioRecorder:
     
     def stop_recording(self):
         """Stop recording system audio."""
+        
+        filename = ""
         if not self.recording:
             print("Not currently recording!")
-            return False
+            return filename
+
             
         try:
             self.recording = False
@@ -88,11 +92,11 @@ class SystemAudioRecorder:
                 self.file = None
                 print(f"Recording stopped and saved to {filename}")
             
-            return True
+            return filename
             
         except Exception as e:
             print(f"Error stopping recording: {e}")
-            return False
+            return filename
     
     def _audio_callback(self, indata, frames, time, status):
         """Callback function to write audio data to file."""
@@ -111,3 +115,18 @@ class SystemAudioRecorder:
             file_path = os.path.join(AUDIO_FOLDER, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
+
+
+
+def resample_to_16k(path: str):
+    """Resample a WAV file to 16kHz mono and overwrite it."""
+    data, sr = sf.read(path)
+    if data.ndim > 1:
+        data = data.mean(axis=1)  # Convert to mono
+    if sr != 16000:
+        print(f"Resampling {path} from {sr} Hz to 16000 Hz...")
+        data = librosa.resample(data, orig_sr=sr, target_sr=16000)
+        sf.write(path, data, 16000)
+        print(f"Saved resampled file: {path}")
+    else:
+        print(f"{path} is already 16kHz mono. No resampling needed.")
