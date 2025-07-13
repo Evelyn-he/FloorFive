@@ -17,25 +17,14 @@ POSE_IDX = [33, 263, 1, 61, 291, 199]
 
 def get_model_output(frame: np.ndarray) -> np.ndarray | None:
     """Run the ONNX face-mesh; return a (478,3) np.float32 array or None."""
-    # 1) BGR→RGB  2) resize to 192×192  3) uint8 NCHW batch
-    rgb   = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    small = cv2.resize(rgb, (192,192)).astype(np.uint8)
-    batch = small.transpose(2,0,1)[None, ...]  # (1,3,192,192)
-
+    # 1) resize to 192×192  2) uint8 NCHW batch
+    frame = cv2.resize(frame, (192,192)).astype(np.uint8)
+    batch = frame.transpose(2,0,1)[None, ...]  # (1,3,192,192)
     outs = MP_landmark.run(None, {INPUT_NAME: batch})
-    # pick the output whose last dim == 3
-    for o in outs:
-        arr = np.array(o)
-        if arr.ndim >= 3 and arr.shape[-1] == 3:
-            lm = arr
-            break
-    else:
-        return None
-
-    # collapse to (478,3)
-    if   lm.ndim == 4: lm = lm.reshape(-1,3)
-    elif lm.ndim == 3: lm = lm[0]
-    return lm.astype(np.float32)
+    # collapse to (468,3)
+    lm = outs[1]
+    lm = lm.reshape(468,3).astype(np.float32)
+    return lm / 255
 
 
 def is_distracted(frame: np.ndarray) -> bool:
@@ -90,7 +79,7 @@ def is_distracted(frame: np.ndarray) -> bool:
     #cv2.putText(frame, head_text, (10,30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,0), 2)
 
     # ——— 2) EYE CLOSURE ———
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     faces = face_cascade.detectMultiScale(
         gray, scaleFactor=1.1, minNeighbors=5, minSize=(100,100)
     )
@@ -118,4 +107,5 @@ def is_distracted(frame: np.ndarray) -> bool:
     #print(eye_text)
     #cv2.putText(frame, eye_text, (10,60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, eye_color, 2)\
 
+    # print(f"distracted: {distracted}, eyes_closed: {eyes_closed}")
     return distracted or eyes_closed
