@@ -52,12 +52,13 @@ while cap.isOpened():
     buffer_idx = (buffer_idx + 1) % buffer_size
 
     # Check when to start/stop recording
+
     if not IS_RECORDING and distraction_avg >= 0.6:
         IS_RECORDING = True
         recorder.start_recording()
         print('START RECORDING')
 
-    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.2:
+    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.5:
         IS_RECORDING = False
         wav_file = recorder.stop_recording()
         threading.Thread(target=process_audio, args=(wav_file, ), daemon=True).start()
