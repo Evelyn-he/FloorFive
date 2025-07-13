@@ -36,8 +36,6 @@ while cap.isOpened():
 
     # convert frame to RGB for detection model
     frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
-
-    # TODO: replace with call to detection models
     distracted = is_distracted(frame)
 
     distracted_buffer[buffer_idx] = distracted
@@ -45,12 +43,12 @@ while cap.isOpened():
     buffer_idx = (buffer_idx + 1) % buffer_size
 
     # Check when to start/stop recording
-    if not IS_RECORDING and distraction_avg >= 0.8:
+    if not IS_RECORDING and distraction_avg >= 0.6:
         IS_RECORDING = True
         recorder.start_recording()
         print('START RECORDING')
 
-    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.1:
+    if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.2:
         IS_RECORDING = False
         recorder.stop_recording()
         print('STOP RECORDING')
