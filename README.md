@@ -61,7 +61,16 @@ ensures wherever you are and whatever you are watching, your activity stays priv
 
 Within the python virtual environment run: `python start.py`
 
-# Contributers
+## Project References
+- Audio transcriptions using Whisper models: https://github.com/thatrandomfrenchdude/simple-whisper-transcription/tree/main
+
+- Head pose estimation using MediaPipe landmark:
+https://github.com/computervisionpro/head-pose-est
+
+- Auto text summarization using Gemma:
+https://github.com/DerrickJ1612/qnn_sample_apps
+
+## Contributers
 Evelyn He:
 
 Haolin Ye:
