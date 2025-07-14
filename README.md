@@ -71,12 +71,22 @@ https://github.com/computervisionpro/head-pose-est
 https://github.com/DerrickJ1612/qnn_sample_apps
 
 ## Contributers
-Evelyn He:
+
+Evelyn He: 
+- https://www.linkedin.com/in/evelyn-he/
 
 Haolin Ye:
+- haolinlink@gmail.com
+- https://www.linkedin.com/in/haolin-ye-020416/
 
 Nathan Han:
+- natesd05@gmail.com
+- https://www.linkedin.com/in/nathan-han-7808a52b4/
 
 Yathusan Koneswararajah:
+- yathusank630@gmail.com
+- https://www.linkedin.com/in/yathusan-k/
 
 Kevin Zhu:
+- kevinzhu2468@gmail.com
+
