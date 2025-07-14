@@ -1,6 +1,21 @@
 from transformers import AutoConfig, AutoTokenizer
 import onnxruntime
 import numpy as np
+import os
+import subprocess
+# --------------------------
+# 0. Clone repo if missing
+# --------------------------
+
+_PATH_TO_MODEL = os.environ.get("GEMMA_ONNX_PATH", "gemma-3-1b-it-ONNX")
+_REPO_URL      = "https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX"
+
+if not os.path.isdir(_PATH_TO_MODEL):
+    subprocess.run(
+        ["git", "clone", _REPO_URL, _PATH_TO_MODEL],
+        check=True
+    )
+
 
 # 1. Load config, processor, and model
 path_to_model = "gemma-3-1b-it-ONNX"
@@ -32,8 +47,8 @@ def generate_response(prompt, max_new_tokens=1024):
         for layer in range(num_hidden_layers)
         for kv in ('key', 'value')
     }
-    input_ids = inputs['input_ids']
-    position_ids = np.tile(np.arange(1, input_ids.shape[-1] + 1), (batch_size, 1))
+    input_ids = inputs['input_ids'].astype(np.int64)
+    position_ids = np.tile(np.arange(1, input_ids.shape[-1] + 1), (batch_size, 1)).astype(np.int64)
 
     # 3. Generation loop
     max_new_tokens = 1024
