@@ -1,5 +1,5 @@
 # Never Miss a Moment Again with LoQ-in AI
-LoQ-in AI is an intelligent desktop application that automatically captures and summarizes audio content when you're away or distracted. Whether you are watching your favorite movie, following an online lecture, or participating in Zoom meetings, LoQ-in AI will intelligently monitor your attention and status to ensure you don't miss out on any important content.
+LoQ-in AI is an intelligent desktop application that automatically captures and summarizes audio content when you're away or distracted. Whether you are watching your favorite movie, following an online lecture, or participating in Zoom meetings, LoQ-in AI will intelligently monitor your attention and status to ensure you don't miss any important content.
 
 ## How It Works
 LoQ-in AI is a background application that uses computer vision models to detect when you are away or no longer actively viewing your screen. When it determines a user has been away or distracted for an extended period of time, the application will automatically begin recording the computer's audio output. Upon returning, a convenient pop-up appears with an AI-generated summary of what was missed.
