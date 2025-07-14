@@ -61,6 +61,29 @@ ensures wherever you are and whatever you are watching, your activity stays priv
 
 Within the python virtual environment run: `python start.py`
 
+## Using Gemma
+Gemma is not yet fully integrated into the current project. Integration will be completed in future work. However, we provide a script that allows users to communicate with Gemma easily in the meantime.
+1. Navigate to the `gemma` directory:
+   ```bash
+   cd gemma
+   ```
+
+2. Launch Python from the command line:
+   ```bash
+   python
+   ```
+
+3. Import the response function:
+   ```python
+   from gemma_chat import generate_response
+   ```
+
+4. You can now interact with Gemma by calling the function:
+   ```python
+   generate_response("Hi Gemma")
+   ```
+
+
 ## Project References
 - Audio transcriptions using Whisper models: https://github.com/thatrandomfrenchdude/simple-whisper-transcription/tree/main
 
