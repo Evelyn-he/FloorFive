@@ -7,6 +7,7 @@ from popup.chatbot_launcher import launch_chatbot, kill_chatbot
 from audio_pipeline.record_system_audio import SystemAudioRecorder, resample_to_16k
 from whisper_pipeline.transcriber import transcribe
 from gemma_pipeline.run_gemma import GemmaRunner
+from gemma_chat import generate_response
 
 # State variables
 IS_RECORDING = False
@@ -36,9 +37,8 @@ chatbot = launch_chatbot()
 def process_audio(filename):
     resample_to_16k(filename)
     transcript = transcribe(filename)
-    prompt = "<start_of_turn>user\nMy professor is recording a lecture. Give a SHORT summary of this snippet of his lecture: " + transcript + "<end_of_turn><start_of_turn>model\n"
-    r = GemmaRunner()
-    output = r.create_session(prompt)
+    prompt = "<start_of_turn>user\nMy professor is recording a lecture. Give ONLY a SHORT summary of this snippet of his lecture: " + transcript + "<end_of_turn><start_of_turn>model\n"
+    output = generate_response(prompt)
     print("OUTPUT HERE:", output)
     with open("popup/text.txt", "a", encoding="utf-8") as f:
         f.write("\n\n" + output)
@@ -60,12 +60,13 @@ while cap.isOpened():
 
     if not IS_RECORDING and distraction_avg >= 0.6:
         IS_RECORDING = True
-        recorder.start_recording()
+        # recorder.start_recording()
         print('START RECORDING')
 
     if IS_RECORDING and not MANUAL_OVERRIDE and distraction_avg <= 0.5:
         IS_RECORDING = False
-        wav_file = recorder.stop_recording()
+        # wav_file = recorder.stop_recording()
+        wav_file = 'audio_0.wav'
         threading.Thread(target=process_audio, args=(wav_file, ), daemon=True).start()
 
     # convert frame back to BGR to displaying
@@ -88,7 +89,8 @@ while cap.isOpened():
         if IS_RECORDING:
             recorder.start_recording()
         else:
-            wav_file = recorder.stop_recording()
+            # wav_file = recorder.stop_recording()
+            wav_file = 'audio_0.wav'
             threading.Thread(target=process_audio, args=(wav_file, ), daemon=True).start()
 
     # check for escape key
