@@ -3,18 +3,28 @@ import onnxruntime
 import numpy as np
 import os
 import subprocess
+import urllib.request
 # --------------------------
 # 0. Clone repo if missing
 # --------------------------
 
 _PATH_TO_MODEL = os.environ.get("GEMMA_ONNX_PATH", "gemma-3-1b-it-ONNX")
-_REPO_URL      = "https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX"
+_ONNX_DIR = os.path.join(_PATH_TO_MODEL, "onnx")
+os.makedirs(_ONNX_DIR, exist_ok=True)
 
-if not os.path.isdir(_PATH_TO_MODEL):
-    subprocess.run(
-        ["git", "clone", _REPO_URL, _PATH_TO_MODEL],
-        check=True
-    )
+# URLs for raw files (not the GitHub-style blob links)
+FILE_URLS = {
+    "model.onnx":      "https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX/resolve/main/onnx/model.onnx",
+    "model.onnx_data": "https://huggingface.co/onnx-community/gemma-3-1b-it-ONNX/resolve/main/onnx/model.onnx_data",
+}
+
+for filename, url in FILE_URLS.items():
+    target_path = os.path.join(_ONNX_DIR, filename)
+    if not os.path.exists(target_path):
+        print(f"Downloading {filename}...")
+        urllib.request.urlretrieve(url, target_path)
+    else:
+        print(f"{filename} already exists, skipping.")
 
 
 # 1. Load config, processor, and model
