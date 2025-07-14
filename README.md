@@ -1,8 +1,8 @@
-# Never Miss a Moment Again with LoQ-in AI
-LoQ-in AI is an intelligent desktop application that automatically captures and summarizes audio content when you're away or distracted. Whether you are watching your favorite movie, following an online lecture, or participating in Zoom meetings, LoQ-in AI will intelligently monitor your attention and status to ensure you don't miss any important content.
+# LoQIn AI - Never Miss a Moment Again
+LoQIn AI is an intelligent desktop application that automatically captures and summarizes audio content when you're away or distracted. Whether you are watching your favorite movie, following an online lecture, or participating in Zoom meetings, LoQIn AI will intelligently monitor your attention and status to ensure you don't miss any important content.
 
 ## How It Works
-LoQ-in AI is a background application that uses computer vision models to detect when you are away or no longer actively viewing your screen. When it determines a user has been away or distracted for an extended period of time, the application will automatically begin recording the computer's audio output. Upon returning, a convenient pop-up appears with an AI-generated summary of what was missed.
+LoQIn AI is a background application that uses computer vision models to detect when you are away or no longer actively viewing your screen. When it determines a user has been away or distracted for an extended period of time, the application will automatically begin recording the computer's audio output. Upon returning, a convenient pop-up appears with an AI-generated summary of what was missed.
 
 ## Use Cases
 - Remote Work: Stay updated during work meetings when you need to step away briefly
@@ -10,7 +10,7 @@ LoQ-in AI is a background application that uses computer vision models to detect
 - Entertainment: Catch up on live streams and shows after bathroom breaks or phone calls
 
 ## Privacy and Security
-LoQ-in AI operates entirely offline with no data transmitted to external servers. Camera
+LoQIn AI operates entirely offline with no data transmitted to external servers. Camera
 input and audio recordings are processed locally and deleted after summarization. This
 ensures wherever you are and whatever you are watching, your activity stays private and secure.
 
